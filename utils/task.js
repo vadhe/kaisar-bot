@@ -1,18 +1,18 @@
 import { logger, HttpsProxyAgent, axios } from './exporter.js';
 
-function createApiClient(proxy, token) {
-    const agent = new HttpsProxyAgent(proxy);
+function createApiClient(token) {
+    // const agent = new HttpsProxyAgent(proxy);
     return axios.create({
         baseURL: 'https://zero-api.kaisar.io/',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         },
-        agent,
+        // agent,
     });
 }
-async function fetchMissionTasks(extensionId, proxy, token) {
-    const apiClient = createApiClient(proxy, token); 
+async function fetchMissionTasks(extensionId, token) {
+    const apiClient = createApiClient(token); 
 
     try {
         const response = await apiClient.get('mission/tasks');
@@ -32,8 +32,8 @@ async function fetchMissionTasks(extensionId, proxy, token) {
     }
 }
 let payload = {referrer: "EoKtoJ377"}
-async function claimMissionTasks(extensionId, proxy, token, taskIds) {
-    const apiClient = createApiClient(proxy, token); 
+async function claimMissionTasks(extensionId, token, taskIds) {
+    const apiClient = createApiClient(token); 
 
     for (let taskId of taskIds) {
         try {
@@ -46,8 +46,8 @@ async function claimMissionTasks(extensionId, proxy, token, taskIds) {
     }
 }
 export { payload as headers }
-export async function dailyCheckin(extensionId, proxy, token) {
-    const apiClient = createApiClient(proxy, token); 
+export async function dailyCheckin(extensionId, token) {
+    const apiClient = createApiClient(token); 
 
     try {
         const response = await apiClient.post('checkin/check', {});
@@ -59,10 +59,10 @@ export async function dailyCheckin(extensionId, proxy, token) {
         logger(`[${extensionId}] Error when check-in: Already checked in today...`, 'error');
     }
 }
-export async function checkAndClaimTask(extensionId, proxy, token) {
-    const taskIds = await fetchMissionTasks(extensionId, proxy, token);
+export async function checkAndClaimTask(extensionId, token) {
+    const taskIds = await fetchMissionTasks(extensionId, token);
     if (taskIds && taskIds.length > 0) {
-        await claimMissionTasks(extensionId, proxy, token, taskIds);
+        await claimMissionTasks(extensionId, token, taskIds);
     } else {
         logger(`[${extensionId}] No tasks that can be claimed found...`);
     }
